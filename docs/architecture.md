@@ -160,24 +160,6 @@ flowchart TD
     H --> J[작업 완료]
 ```
 
-### 3. 상태 모니터링 플로우
-
-```mermaid
-sequenceDiagram
-    participant F as 프론트엔드
-    participant B as 백엔드
-    participant T as Task Manager
-    
-    F->>B: GET /status/{task_id}
-    B->>T: 작업 상태 조회
-    T-->>B: 현재 진행률 + 단계
-    B-->>F: 상태 응답
-    F->>F: UI 업데이트
-    
-    loop 완료될 때까지
-        F->>B: 2초 후 다시 요청
-    end
-```
 
 ## 📁 디렉토리 구조
 
@@ -203,70 +185,6 @@ pdf-presentation-generator/
 └── README.md              # 프로젝트 개요
 ```
 
-## 🔧 기술 스택 상세
-
-### 백엔드 아키텍처
-
-```mermaid
-graph LR
-    subgraph "FastAPI 서버"
-        A[API Endpoints]
-        B[Background Tasks]
-        C[Task Manager]
-        D[File Handler]
-    end
-    
-    subgraph "처리 파이프라인"
-        E[PDF Processor]
-        F[Script Generator]
-        G[Voice Generator]
-        H[Video Creator]
-    end
-    
-    subgraph "외부 서비스"
-        I[Azure OpenAI]
-        J[VibeVoice]
-        K[FFmpeg]
-    end
-    
-    A --> B
-    B --> C
-    C --> E
-    E --> F
-    F --> G
-    G --> H
-    
-    F --> I
-    G --> J
-    H --> K
-```
-
-### 프론트엔드 아키텍처
-
-```mermaid
-graph TD
-    subgraph "React 애플리케이션"
-        A[App.js]
-        B[FileUpload Component]
-        C[ProgressTracker Component]
-        D[AppContext]
-        E[API Service]
-    end
-    
-    subgraph "상태 관리"
-        F[Context API]
-        G[useState]
-        H[useCallback]
-    end
-    
-    A --> B
-    A --> C
-    A --> D
-    D --> E
-    D --> F
-    F --> G
-    F --> H
-```
 
 ## 🚀 성능 최적화
 
@@ -285,32 +203,4 @@ graph TD
 - 환경변수를 통한 설정 관리
 - 마이크로서비스 아키텍처 준비
 
-## 🔒 보안 아키텍처
 
-### API 키 보안
-```mermaid
-graph TD
-    A[환경변수] --> B[.env 파일]
-    B --> C[Git 무시]
-    C --> D[안전한 배포]
-    
-    E[하드코딩] --> F[보안 위험]
-    F --> G[Git 커밋 노출]
-```
-
-### 파일 보안
-- 업로드 파일 유효성 검사
-- 임시 파일 자동 삭제
-- 파일 크기 제한
-
-## 📊 모니터링 및 로깅
-
-### 로그 구조
-- 단계별 진행률 로그
-- 오류 추적 및 디버깅
-- 성능 메트릭 수집
-
-### 상태 추적
-- 실시간 작업 상태
-- 진행률 퍼센티지
-- 현재 처리 단계
