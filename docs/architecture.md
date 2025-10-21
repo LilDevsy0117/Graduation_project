@@ -1,0 +1,316 @@
+# 시스템 아키텍처
+
+PDF 발표 영상 자동 생성기의 시스템 아키텍처와 컴포넌트 구조를 설명합니다.
+
+## 📊 시스템 아키텍처 다이어그램
+
+### 전체 워크플로우
+
+```mermaid
+sequenceDiagram
+    participant U as 사용자
+    participant W as 웹 UI (React)
+    participant A as FastAPI 서버
+    participant P as PDF 처리기
+    participant S as 스크립트 생성기 (GPT-4)
+    participant V as 음성 생성기 (VibeVoice)
+    participant VC as 영상 생성기 (FFmpeg)
+    participant F as 파일 시스템
+
+    U->>W: PDF + 음성 파일 업로드
+    W->>A: POST /upload (파일, 언어, 자막옵션)
+    A->>F: 파일 저장
+    A->>A: 작업 ID 생성
+    A-->>W: task_id 반환
+    
+    par 백그라운드 처리 시작
+        A->>P: PDF → 이미지 변환
+        P->>F: 슬라이드 이미지 저장
+        P-->>A: 이미지 경로 반환 (10%)
+        
+        A->>S: 이미지 → 스크립트 생성
+        loop 각 슬라이드별
+            S->>S: GPT-4 Vision API 호출
+            S-->>A: 스크립트 반환
+        end
+        A-->>A: 스크립트 완료 (30%)
+        
+        A->>V: 스크립트 → 음성 생성
+        loop 각 스크립트별
+            V->>V: VibeVoice 실행
+            V-->>A: 음성 파일 반환
+        end
+        A-->>A: 음성 완료 (60%)
+        
+        A->>VC: 이미지 + 음성 → 영상 생성
+        VC->>VC: FFmpeg로 영상 합성
+        VC-->>A: 영상 파일 반환 (80%)
+        
+        alt 자막 옵션 선택됨
+            A->>VC: SRT 파일 생성
+            VC->>VC: FFmpeg 자막 오버레이
+            VC-->>A: 자막 포함 영상 반환
+        end
+        
+        A->>A: 최종 파일명 생성
+        A-->>A: 완료 (100%)
+    end
+    
+    loop 상태 확인
+        W->>A: GET /status/{task_id}
+        A-->>W: 진행률 + 현재 단계
+    end
+    
+    W->>A: GET /download/{task_id}
+    A->>F: 영상 파일 읽기
+    A-->>W: 영상 파일 다운로드
+    W-->>U: 발표 영상 다운로드
+```
+
+## 🏗️ 컴포넌트 아키텍처
+
+### 시스템 구성 요소
+
+```mermaid
+graph TB
+    subgraph "프론트엔드 (React)"
+        UI[웹 UI]
+        C[Context API]
+        API[API Service]
+    end
+    
+    subgraph "백엔드 (FastAPI)"
+        EP[API Endpoints]
+        BG[Background Tasks]
+        TM[Task Manager]
+    end
+    
+    subgraph "AI/ML 서비스"
+        GPT[Azure OpenAI<br/>GPT-4 Vision]
+        VV[VibeVoice<br/>보이스 클로닝]
+    end
+    
+    subgraph "처리 엔진"
+        PDF[PDF Processor<br/>PyMuPDF]
+        SCRIPT[Script Generator]
+        VOICE[Voice Generator]
+        VIDEO[Video Creator<br/>FFmpeg]
+    end
+    
+    subgraph "저장소"
+        FS[File System]
+        TEMP[Temp Files]
+        OUTPUT[Output Files]
+    end
+    
+    UI --> C
+    C --> API
+    API --> EP
+    EP --> BG
+    BG --> TM
+    TM --> PDF
+    TM --> SCRIPT
+    TM --> VOICE
+    TM --> VIDEO
+    
+    SCRIPT --> GPT
+    VOICE --> VV
+    VIDEO --> FS
+    
+    PDF --> TEMP
+    SCRIPT --> TEMP
+    VOICE --> TEMP
+    VIDEO --> OUTPUT
+    
+    style UI fill:#e1f5fe
+    style GPT fill:#f3e5f5
+    style VV fill:#f3e5f5
+    style FS fill:#e8f5e8
+```
+
+## 🔄 데이터 플로우
+
+### 1. 파일 업로드 플로우
+
+```mermaid
+flowchart TD
+    A[사용자 파일 선택] --> B[파일 유효성 검사]
+    B --> C{유효한 파일?}
+    C -->|No| D[오류 메시지 표시]
+    C -->|Yes| E[FormData 생성]
+    E --> F[FastAPI 서버로 전송]
+    F --> G[파일 저장]
+    G --> H[작업 ID 생성]
+    H --> I[백그라운드 작업 시작]
+```
+
+### 2. 백그라운드 처리 플로우
+
+```mermaid
+flowchart TD
+    A[백그라운드 작업 시작] --> B[PDF → 이미지 변환]
+    B --> C[이미지 → 스크립트 생성]
+    C --> D[스크립트 → 음성 생성]
+    D --> E[이미지 + 음성 → 영상 생성]
+    E --> F{자막 옵션?}
+    F -->|Yes| G[SRT 파일 생성]
+    F -->|No| H[최종 파일명 생성]
+    G --> I[자막 오버레이]
+    I --> H
+    H --> J[작업 완료]
+```
+
+### 3. 상태 모니터링 플로우
+
+```mermaid
+sequenceDiagram
+    participant F as 프론트엔드
+    participant B as 백엔드
+    participant T as Task Manager
+    
+    F->>B: GET /status/{task_id}
+    B->>T: 작업 상태 조회
+    T-->>B: 현재 진행률 + 단계
+    B-->>F: 상태 응답
+    F->>F: UI 업데이트
+    
+    loop 완료될 때까지
+        F->>B: 2초 후 다시 요청
+    end
+```
+
+## 📁 디렉토리 구조
+
+```
+pdf-presentation-generator/
+├── core/                    # 핵심 처리 모듈
+│   ├── pdf_processor.py     # PDF → 이미지 변환
+│   ├── script_generator.py  # 이미지 → 스크립트 생성
+│   ├── voice_generator.py   # 스크립트 → 음성 생성
+│   └── video_creator.py     # 영상 생성 및 합성
+├── models/                  # 데이터 모델
+│   └── schemas.py          # Pydantic 모델 정의
+├── web-demo/               # React 웹 데모
+│   ├── src/
+│   │   ├── components/     # React 컴포넌트
+│   │   ├── context/        # 상태 관리
+│   │   └── services/       # API 서비스
+│   └── package.json
+├── docs/                   # 문서
+│   └── architecture.md     # 이 파일
+├── main.py                 # FastAPI 메인 서버
+├── requirements.txt        # Python 의존성
+└── README.md              # 프로젝트 개요
+```
+
+## 🔧 기술 스택 상세
+
+### 백엔드 아키텍처
+
+```mermaid
+graph LR
+    subgraph "FastAPI 서버"
+        A[API Endpoints]
+        B[Background Tasks]
+        C[Task Manager]
+        D[File Handler]
+    end
+    
+    subgraph "처리 파이프라인"
+        E[PDF Processor]
+        F[Script Generator]
+        G[Voice Generator]
+        H[Video Creator]
+    end
+    
+    subgraph "외부 서비스"
+        I[Azure OpenAI]
+        J[VibeVoice]
+        K[FFmpeg]
+    end
+    
+    A --> B
+    B --> C
+    C --> E
+    E --> F
+    F --> G
+    G --> H
+    
+    F --> I
+    G --> J
+    H --> K
+```
+
+### 프론트엔드 아키텍처
+
+```mermaid
+graph TD
+    subgraph "React 애플리케이션"
+        A[App.js]
+        B[FileUpload Component]
+        C[ProgressTracker Component]
+        D[AppContext]
+        E[API Service]
+    end
+    
+    subgraph "상태 관리"
+        F[Context API]
+        G[useState]
+        H[useCallback]
+    end
+    
+    A --> B
+    A --> C
+    A --> D
+    D --> E
+    D --> F
+    F --> G
+    F --> H
+```
+
+## 🚀 성능 최적화
+
+### 비동기 처리
+- FastAPI의 `BackgroundTasks`를 사용한 비동기 처리
+- `asyncio.sleep(0)`을 통한 이벤트 루프 양보
+- 실시간 진행률 업데이트
+
+### 메모리 관리
+- 임시 파일 자동 정리
+- 스트리밍 파일 처리
+- GPU 메모리 효율적 사용
+
+### 확장성
+- 모듈화된 컴포넌트 구조
+- 환경변수를 통한 설정 관리
+- 마이크로서비스 아키텍처 준비
+
+## 🔒 보안 아키텍처
+
+### API 키 보안
+```mermaid
+graph TD
+    A[환경변수] --> B[.env 파일]
+    B --> C[Git 무시]
+    C --> D[안전한 배포]
+    
+    E[하드코딩] --> F[보안 위험]
+    F --> G[Git 커밋 노출]
+```
+
+### 파일 보안
+- 업로드 파일 유효성 검사
+- 임시 파일 자동 삭제
+- 파일 크기 제한
+
+## 📊 모니터링 및 로깅
+
+### 로그 구조
+- 단계별 진행률 로그
+- 오류 추적 및 디버깅
+- 성능 메트릭 수집
+
+### 상태 추적
+- 실시간 작업 상태
+- 진행률 퍼센티지
+- 현재 처리 단계

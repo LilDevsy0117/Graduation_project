@@ -201,130 +201,20 @@ curl -O http://localhost:9200/download/123e4567-e89b-12d3-a456-426614174000
 3. **상태 모니터링** → 실시간 진행 상황 확인
 4. **결과 다운로드** → 완성된 발표 영상 다운로드
 
-## 📊 시스템 아키텍처 다이어그램
+## 📊 시스템 아키텍처
 
-```mermaid
-sequenceDiagram
-    participant U as 사용자
-    participant W as 웹 UI (React)
-    participant A as FastAPI 서버
-    participant P as PDF 처리기
-    participant S as 스크립트 생성기 (GPT-4)
-    participant V as 음성 생성기 (VibeVoice)
-    participant VC as 영상 생성기 (FFmpeg)
-    participant F as 파일 시스템
+자세한 시스템 아키텍처와 컴포넌트 구조는 [아키텍처 문서](docs/architecture.md)를 참조하세요.
 
-    U->>W: PDF + 음성 파일 업로드
-    W->>A: POST /upload (파일, 언어, 자막옵션)
-    A->>F: 파일 저장
-    A->>A: 작업 ID 생성
-    A-->>W: task_id 반환
-    
-    par 백그라운드 처리 시작
-        A->>P: PDF → 이미지 변환
-        P->>F: 슬라이드 이미지 저장
-        P-->>A: 이미지 경로 반환 (10%)
-        
-        A->>S: 이미지 → 스크립트 생성
-        loop 각 슬라이드별
-            S->>S: GPT-4 Vision API 호출
-            S-->>A: 스크립트 반환
-        end
-        A-->>A: 스크립트 완료 (30%)
-        
-        A->>V: 스크립트 → 음성 생성
-        loop 각 스크립트별
-            V->>V: VibeVoice 실행
-            V-->>A: 음성 파일 반환
-        end
-        A-->>A: 음성 완료 (60%)
-        
-        A->>VC: 이미지 + 음성 → 영상 생성
-        VC->>VC: FFmpeg로 영상 합성
-        VC-->>A: 영상 파일 반환 (80%)
-        
-        alt 자막 옵션 선택됨
-            A->>VC: SRT 파일 생성
-            VC->>VC: FFmpeg 자막 오버레이
-            VC-->>A: 자막 포함 영상 반환
-        end
-        
-        A->>A: 최종 파일명 생성
-        A-->>A: 완료 (100%)
-    end
-    
-    loop 상태 확인
-        W->>A: GET /status/{task_id}
-        A-->>W: 진행률 + 현재 단계
-    end
-    
-    W->>A: GET /download/{task_id}
-    A->>F: 영상 파일 읽기
-    A-->>W: 영상 파일 다운로드
-    W-->>U: 발표 영상 다운로드
-```
+- **시퀀스 다이어그램**: 전체 워크플로우 시각화
+- **컴포넌트 아키텍처**: 시스템 구성 요소 관계
+- **데이터 플로우**: 파일 처리 과정
+- **성능 최적화**: 비동기 처리 및 메모리 관리
 
-## 🏗️ 컴포넌트 아키텍처
+## 📊 API 문서
 
-```mermaid
-graph TB
-    subgraph "프론트엔드 (React)"
-        UI[웹 UI]
-        C[Context API]
-        API[API Service]
-    end
-    
-    subgraph "백엔드 (FastAPI)"
-        EP[API Endpoints]
-        BG[Background Tasks]
-        TM[Task Manager]
-    end
-    
-    subgraph "AI/ML 서비스"
-        GPT[Azure OpenAI<br/>GPT-4 Vision]
-        VV[VibeVoice<br/>보이스 클로닝]
-    end
-    
-    subgraph "처리 엔진"
-        PDF[PDF Processor<br/>PyMuPDF]
-        SCRIPT[Script Generator]
-        VOICE[Voice Generator]
-        VIDEO[Video Creator<br/>FFmpeg]
-    end
-    
-    subgraph "저장소"
-        FS[File System]
-        TEMP[Temp Files]
-        OUTPUT[Output Files]
-    end
-    
-    UI --> C
-    C --> API
-    API --> EP
-    EP --> BG
-    BG --> TM
-    TM --> PDF
-    TM --> SCRIPT
-    TM --> VOICE
-    TM --> VIDEO
-    
-    SCRIPT --> GPT
-    VOICE --> VV
-    VIDEO --> FS
-    
-    PDF --> TEMP
-    SCRIPT --> TEMP
-    VOICE --> TEMP
-    VIDEO --> OUTPUT
-    
-    style UI fill:#e1f5fe
-    style GPT fill:#f3e5f5
-    style VV fill:#f3e5f5
-    style FS fill:#e8f5e8
-```
+자세한 API 문서는 [API 문서](docs/api.md)를 참조하세요.
 
-## 📊 API 엔드포인트
-
+### 주요 엔드포인트
 | 메서드 | 엔드포인트 | 설명 |
 |--------|------------|------|
 | GET | `/` | API 정보 |
@@ -334,6 +224,9 @@ graph TB
 | GET | `/download/{task_id}` | 결과 파일 다운로드 |
 | GET | `/tasks` | 작업 목록 조회 |
 | DELETE | `/tasks/{task_id}` | 작업 삭제 |
+
+### Swagger UI
+대화형 API 문서: `http://localhost:9200/docs`
 
 ## 🌍 다국어 지원
 
