@@ -208,8 +208,6 @@ curl -O http://localhost:9200/download/123e4567-e89b-12d3-a456-426614174000
 - **시퀀스 다이어그램**: 전체 워크플로우 시각화
 - **컴포넌트 아키텍처**: 시스템 구성 요소 관계
 - **데이터 플로우**: 파일 처리 과정
-- **디렉토리 구조**: 프로젝트 구조
-- **성능 최적화**: 비동기 처리 및 메모리 관리
 
 ## 📊 API 문서
 
@@ -228,6 +226,49 @@ curl -O http://localhost:9200/download/123e4567-e89b-12d3-a456-426614174000
 
 ### Swagger UI
 대화형 API 문서: `http://localhost:9200/docs`
+
+## 📁 프로젝트 구조
+
+```
+pdf-presentation-generator/
+├── core/                    # 핵심 처리 모듈
+│   ├── pdf_processor.py     # PDF → 이미지 변환
+│   ├── script_generator.py  # 이미지 → 스크립트 생성
+│   ├── voice_generator.py   # 스크립트 → 음성 생성
+│   └── video_creator.py     # 영상 생성 및 합성
+├── models/                  # 데이터 모델
+│   └── schemas.py          # Pydantic 모델 정의
+├── web-demo/               # React 웹 데모
+│   ├── src/
+│   │   ├── components/     # React 컴포넌트
+│   │   ├── context/        # 상태 관리
+│   │   └── services/       # API 서비스
+│   └── package.json
+├── docs/                   # 문서
+│   ├── architecture.md     # 시스템 아키텍처
+│   ├── api.md             # API 문서
+│   └── README.md          # 문서 인덱스
+├── main.py                 # FastAPI 메인 서버
+├── requirements.txt        # Python 의존성
+└── README.md              # 프로젝트 개요
+```
+
+## 🚀 성능 최적화
+
+### 비동기 처리
+- **FastAPI BackgroundTasks**: 파일 업로드 후 즉시 응답 반환
+- **asyncio.sleep(0)**: 이벤트 루프 양보로 실시간 진행률 업데이트
+- **폴링 메커니즘**: 프론트엔드에서 주기적 상태 확인
+
+### 메모리 관리
+- **임시 파일 자동 정리**: 처리 완료 후 자동 삭제
+- **스트리밍 파일 처리**: 대용량 파일 메모리 효율적 처리
+- **GPU 메모리 최적화**: VibeVoice 모델 효율적 사용
+
+### 확장성
+- **모듈화된 구조**: 각 컴포넌트 독립적 개발/테스트 가능
+- **환경변수 설정**: 다양한 환경에서 유연한 설정
+- **마이크로서비스 준비**: 향후 서비스 분리 가능한 구조
 
 ## 🌍 다국어 지원
 

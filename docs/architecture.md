@@ -161,46 +161,5 @@ flowchart TD
 ```
 
 
-## 📁 디렉토리 구조
-
-```
-pdf-presentation-generator/
-├── core/                    # 핵심 처리 모듈
-│   ├── pdf_processor.py     # PDF → 이미지 변환
-│   ├── script_generator.py  # 이미지 → 스크립트 생성
-│   ├── voice_generator.py   # 스크립트 → 음성 생성
-│   └── video_creator.py     # 영상 생성 및 합성
-├── models/                  # 데이터 모델
-│   └── schemas.py          # Pydantic 모델 정의
-├── web-demo/               # React 웹 데모
-│   ├── src/
-│   │   ├── components/     # React 컴포넌트
-│   │   ├── context/        # 상태 관리
-│   │   └── services/       # API 서비스
-│   └── package.json
-├── docs/                   # 문서
-│   └── architecture.md     # 이 파일
-├── main.py                 # FastAPI 메인 서버
-├── requirements.txt        # Python 의존성
-└── README.md              # 프로젝트 개요
-```
-
-
-## 🚀 성능 최적화
-
-### 비동기 처리
-- FastAPI의 `BackgroundTasks`를 사용한 비동기 처리
-- `asyncio.sleep(0)`을 통한 이벤트 루프 양보
-- 실시간 진행률 업데이트
-
-### 메모리 관리
-- 임시 파일 자동 정리
-- 스트리밍 파일 처리
-- GPU 메모리 효율적 사용
-
-### 확장성
-- 모듈화된 컴포넌트 구조
-- 환경변수를 통한 설정 관리
-- 마이크로서비스 아키텍처 준비
 
 
