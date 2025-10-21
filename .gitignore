@@ -55,3 +55,56 @@ install.log
 # Temporary files
 *.tmp
 *.temp
+
+# API Keys and Secrets
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+config.ini
+secrets.json
+api_keys.txt
+project.py
+
+# Azure OpenAI
+azure_openai_key.txt
+openai_config.json
+
+# VibeVoice
+VibeVoice/
+vibevoice_models/
+*.pth
+*.ckpt
+*.bin
+
+# Output directories
+outputs/
+temp/
+uploads/
+downloads/
+
+# Node.js (for web-demo)
+web-demo/node_modules/
+web-demo/.env
+web-demo/.env.local
+web-demo/build/
+web-demo/dist/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
