@@ -108,7 +108,7 @@ async def health_check():
 @app.post("/upload")
 async def upload_and_create_presentation(
     pdf_file: UploadFile = File(..., description="PDF 파일"),
-    speaker_audio: UploadFile = File(..., description="스피커 음성 파일 (WAV/MP3)"),
+    speaker_audio: UploadFile = File(..., description="스피커 음성 파일 (WAV/MP3/M4A)"),
     language: str = Form("korean"),
     include_subtitles: str = Form("false"),
     background_tasks: BackgroundTasks = BackgroundTasks()
@@ -119,8 +119,8 @@ async def upload_and_create_presentation(
         if not pdf_file.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="PDF 파일만 업로드 가능합니다.")
         
-        if not speaker_audio.filename.endswith(('.wav', '.mp3')):
-            raise HTTPException(status_code=400, detail="음성 파일은 WAV 또는 MP3 형식만 지원됩니다.")
+        if not speaker_audio.filename.endswith(('.wav', '.mp3', '.m4a')):
+            raise HTTPException(status_code=400, detail="음성 파일은 WAV, MP3, M4A 형식만 지원됩니다.")
         
         # 품질 모드와 슬라이드 지속시간은 기본값으로 고정
         quality_mode = "stable_korean"

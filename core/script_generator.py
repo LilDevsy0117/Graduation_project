@@ -13,7 +13,7 @@ class ScriptGenerator:
     def __init__(self):
         # Azure OpenAI 클라이언트 초기화
         self.client = AzureOpenAI(
-            api_version="2024-12-01-preview",
+            api_version=os.getenv("AZURE_OPENAI_API_VERSION", "2024-12-01-preview"),
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT", "https://magosaturn.openai.azure.com/"),
             api_key=os.getenv("AZURE_OPENAI_API_KEY", "YOUR_API_KEY_HERE")
         )
@@ -240,7 +240,7 @@ Presentation script (exactly two sentences):"""
                 
                 response = self.client.chat.completions.create(
                     messages=messages,
-                    model="gpt-4o",
+                    model=os.getenv("AZURE_OPENAI_CHAT_DEPLOYMENT", "gpt-4o"),
                     max_tokens=200,
                     temperature=0.7,
                     top_p=0.95

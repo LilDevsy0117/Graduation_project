@@ -147,7 +147,7 @@ curl -X POST "http://localhost:9200/upload" \
 
 **파라미터:**
 - `pdf_file`: PDF 파일 (필수)
-- `speaker_audio`: 음성 샘플 파일 (필수)
+- `speaker_audio`: 음성 샘플 파일 (WAV/MP3/M4A, 필수)
 - `language`: 발표 언어 (`korean` 또는 `english`, 기본값: `korean`)
 - `include_subtitles`: 자막 포함 여부 (`true` 또는 `false`, 기본값: `false`)
 

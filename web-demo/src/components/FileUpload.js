@@ -34,7 +34,7 @@ const FileUpload = () => {
 
     if (type === 'pdf' && file.type === 'application/pdf') {
       setPdfFile(file);
-    } else if (type === 'audio' && (file.type === 'audio/wav' || file.type === 'audio/mpeg')) {
+    } else if (type === 'audio' && (file.type === 'audio/wav' || file.type === 'audio/mpeg' || file.type === 'audio/mp4')) {
       setAudioFile(file);
     }
   }, []);
@@ -122,7 +122,7 @@ const FileUpload = () => {
           >
             <input
               type="file"
-              accept=".wav,.mp3"
+              accept=".wav,.mp3,.m4a"
               onChange={(e) => handleFileSelect(e, 'audio')}
               disabled={isUploading}
               style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer' }}
@@ -140,7 +140,7 @@ const FileUpload = () => {
               <DropZoneContent>
                 <FiMusic size={48} color="#9ca3af" />
                 <DropZoneTitle>음성 파일을 드래그하거나 클릭하여 선택</DropZoneTitle>
-                <DropZoneSubtitle>WAV, MP3 형식 지원</DropZoneSubtitle>
+                <DropZoneSubtitle>WAV, MP3, M4A 형식 지원</DropZoneSubtitle>
               </DropZoneContent>
             )}
           </DropZone>
