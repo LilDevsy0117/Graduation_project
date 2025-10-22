@@ -319,13 +319,6 @@ pdf-presentation-generator/
 - **CFG 스케일**: 1.6
 
 
-## 🤝 기여하기
-
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
 
 ## 📄 라이선스
 
