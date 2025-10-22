@@ -245,8 +245,7 @@ pdf-presentation-generator/
 │   └── package.json
 ├── docs/                   # 문서
 │   ├── architecture.md     # 시스템 아키텍처
-│   ├── api.md             # API 문서
-│   └── README.md          # 문서 인덱스
+│   └── api.md             # API 문서
 ├── main.py                 # FastAPI 메인 서버
 ├── requirements.txt        # Python 의존성
 └── README.md              # 프로젝트 개요
